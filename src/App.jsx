@@ -86,7 +86,7 @@ const emptyProject = {
 
 const starterResume = {
   personal: {
-    name: "Clyde zhu",
+    name: "Clyde Chen",
     title: "Software Development Student",
     email: "clyde@example.com",
     phone: "+61 400 000 000",
@@ -137,9 +137,57 @@ const starterResume = {
 
 const templates = [
   { id: "modern", label: "Modern", description: "适合科技、产品、设计岗位" },
+  { id: "executive", label: "Executive", description: "类似截图：左侧信息栏 + 深色标题栏" },
   { id: "classic", label: "Classic", description: "适合正式企业、学校申请" },
   { id: "compact", label: "Compact", description: "内容多时更省空间" },
 ];
+
+const uiText = {
+  zh: {
+    profile: "个人简介",
+    skills: "技能",
+    experience: "经历",
+    projects: "项目",
+    education: "教育背景",
+    certifications: "证书 / 奖项",
+    languages: "语言能力",
+    contact: "联系方式",
+    chooseTemplate: "选择简历模板",
+    templates: "模板",
+    basic: "基本信息",
+    expTab: "经历",
+    projectsTab: "项目",
+    educationTab: "教育",
+    extraTab: "技能/其他",
+    aiTips: "AI 写作提示",
+    aiTipSub: "把描述改成更像求职简历的表达",
+    languageSwitch: "语言",
+    chinese: "中文",
+    english: "English",
+  },
+  en: {
+    profile: "Summary",
+    skills: "Skills",
+    experience: "Experience",
+    projects: "Projects",
+    education: "Education",
+    certifications: "Certifications",
+    languages: "Languages",
+    contact: "Contact",
+    chooseTemplate: "Choose Resume Template",
+    templates: "Templates",
+    basic: "Basic Info",
+    expTab: "Experience",
+    projectsTab: "Projects",
+    educationTab: "Education",
+    extraTab: "Skills / Extra",
+    aiTips: "AI Writing Tips",
+    aiTipSub: "Turn descriptions into stronger resume statements",
+    languageSwitch: "Language",
+    chinese: "中文",
+    english: "English",
+  },
+};
 
 function TextInput({ label, value, onChange, placeholder, icon: Icon, textarea = false }) {
   return (
@@ -258,7 +306,157 @@ function ArrayEditor({ items, onChange, placeholder }) {
   );
 }
 
-function ResumePreview({ resume, template }) {
+function ExecutiveResumePreview({ resume, language }) {
+  const t = uiText[language];
+  const clean = (arr) => (arr || []).filter((item) => String(item || "").trim());
+  const initials = (resume.personal.name || "Your Name")
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase() || "CV";
+
+  return (
+    <div id="resume-preview" className="mx-auto grid min-h-[1056px] w-full max-w-[816px] grid-cols-[245px_1fr] bg-white shadow-2xl print:shadow-none">
+      <aside className="border-r border-slate-200 bg-slate-50 p-8 text-slate-900">
+        <div className="mb-7 flex h-36 w-full items-center justify-center border border-rose-200 bg-white">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-px w-12 bg-slate-300" />
+            <div className="text-4xl font-black tracking-tight">{initials}</div>
+            <div className="mx-auto mt-4 h-px w-12 bg-slate-300" />
+          </div>
+        </div>
+
+        <section className="mb-7">
+          <h2 className="mb-3 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.18em] text-slate-700">{t.contact}</h2>
+          <div className="space-y-2 text-xs leading-5 text-slate-700">
+            {resume.personal.location ? <p>{resume.personal.location}</p> : null}
+            {resume.personal.phone ? <p>{resume.personal.phone}</p> : null}
+            {resume.personal.email ? <p>{resume.personal.email}</p> : null}
+            {resume.personal.website ? <p>{resume.personal.website}</p> : null}
+          </div>
+        </section>
+
+        {resume.education.filter((x) => x.school || x.degree).length ? (
+          <section className="mb-7">
+            <h2 className="mb-3 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.18em] text-slate-700">{t.education}</h2>
+            <div className="space-y-4">
+              {resume.education.map((item, index) =>
+                item.school || item.degree ? (
+                  <div key={index} className="text-xs leading-5 text-slate-700">
+                    <h3 className="font-black text-slate-900">{item.degree || "Degree"}</h3>
+                    <p className="font-semibold">{item.school || "School"}</p>
+                    {item.location ? <p>{item.location}</p> : null}
+                    <p>{[item.start, item.end].filter(Boolean).join(" — ")}</p>
+                    {item.details ? <p className="mt-1 text-slate-600">{item.details}</p> : null}
+                  </div>
+                ) : null
+              )}
+            </div>
+          </section>
+        ) : null}
+
+        {clean(resume.skills).length ? (
+          <section>
+            <h2 className="mb-3 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.18em] text-slate-700">{t.skills}</h2>
+            <ul className="list-disc space-y-1 pl-4 text-xs leading-5 text-slate-700">
+              {clean(resume.skills).map((skill, index) => <li key={index}>{skill}</li>)}
+            </ul>
+          </section>
+        ) : null}
+      </aside>
+
+      <main className="p-0">
+        <header className="bg-red-950 px-8 py-6 text-white">
+          <h1 className="text-2xl font-black uppercase tracking-wide">{resume.personal.name || "Your Name"}</h1>
+          <p className="mt-1 text-sm font-semibold text-red-100">{resume.personal.title || "Target Role / Professional Title"}</p>
+        </header>
+
+        <div className="space-y-5 p-8">
+          {resume.personal.summary ? (
+            <section>
+              <h2 className="mb-2 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.2em] text-slate-700">{t.profile}</h2>
+              <p className="text-sm leading-6 text-slate-700">{resume.personal.summary}</p>
+            </section>
+          ) : null}
+
+          {resume.experience.filter((x) => x.role || x.company).length ? (
+            <section>
+              <h2 className="mb-2 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.2em] text-slate-700">{t.experience}</h2>
+              <div className="space-y-4">
+                {resume.experience.map((item, index) =>
+                  item.role || item.company ? (
+                    <div key={index}>
+                      <div className="flex flex-wrap justify-between gap-2">
+                        <div>
+                          <h3 className="text-sm font-black uppercase text-slate-900">{item.role || "Role"}</h3>
+                          <p className="text-xs font-semibold text-slate-600">{item.company || "Company"}{item.location ? ` · ${item.location}` : ""}</p>
+                        </div>
+                        <p className="text-xs font-semibold text-slate-500">{[item.start, item.end].filter(Boolean).join(" — ")}</p>
+                      </div>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-5 text-slate-700">
+                        {clean(item.bullets).map((bullet, bulletIndex) => <li key={bulletIndex}>{bullet}</li>)}
+                      </ul>
+                    </div>
+                  ) : null
+                )}
+              </div>
+            </section>
+          ) : null}
+
+          {resume.projects.filter((x) => x.name).length ? (
+            <section>
+              <h2 className="mb-2 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.2em] text-slate-700">{t.projects}</h2>
+              <div className="space-y-4">
+                {resume.projects.map((item, index) =>
+                  item.name ? (
+                    <div key={index}>
+                      <div className="flex flex-wrap justify-between gap-2">
+                        <h3 className="text-sm font-black uppercase text-slate-900">{item.name}</h3>
+                        {item.link ? <p className="text-xs font-semibold text-slate-500">{item.link}</p> : null}
+                      </div>
+                      {item.tech ? <p className="text-xs font-semibold text-slate-600">{item.tech}</p> : null}
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-5 text-slate-700">
+                        {clean(item.bullets).map((bullet, bulletIndex) => <li key={bulletIndex}>{bullet}</li>)}
+                      </ul>
+                    </div>
+                  ) : null
+                )}
+              </div>
+            </section>
+          ) : null}
+
+          <div className="grid gap-5 md:grid-cols-2">
+            {clean(resume.certifications).length ? (
+              <section>
+                <h2 className="mb-2 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.2em] text-slate-700">{t.certifications}</h2>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                  {clean(resume.certifications).map((item, index) => <li key={index}>{item}</li>)}
+                </ul>
+              </section>
+            ) : null}
+            {clean(resume.languages).length ? (
+              <section>
+                <h2 className="mb-2 border-b border-slate-300 pb-1 text-xs font-black uppercase tracking-[0.2em] text-slate-700">{t.languages}</h2>
+                <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
+                  {clean(resume.languages).map((item, index) => <li key={index}>{item}</li>)}
+                </ul>
+              </section>
+            ) : null}
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function ResumePreview({ resume, template, language }) {
+  if (template === "executive") {
+    return <ExecutiveResumePreview resume={resume} language={language} />;
+  }
+
+  const t = uiText[language];
   const sectionTitleClass =
     template === "classic"
       ? "mb-2 border-b border-slate-300 pb-1 font-serif text-sm font-bold uppercase tracking-[0.18em] text-slate-900"
@@ -293,14 +491,14 @@ function ResumePreview({ resume, template }) {
       <main className={`mt-5 ${spacing}`}>
         {resume.personal.summary ? (
           <section>
-            <h2 className={sectionTitleClass}>Profile</h2>
+            <h2 className={sectionTitleClass}>{t.profile}</h2>
             <p className="text-sm leading-6 text-slate-700">{resume.personal.summary}</p>
           </section>
         ) : null}
 
         {clean(resume.skills).length ? (
           <section>
-            <h2 className={sectionTitleClass}>Skills</h2>
+            <h2 className={sectionTitleClass}>{t.skills}</h2>
             <div className="flex flex-wrap gap-2">
               {clean(resume.skills).map((skill, index) => (
                 <span key={index} className={template === "classic" ? "text-sm text-slate-700" : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"}>
@@ -313,7 +511,7 @@ function ResumePreview({ resume, template }) {
 
         {resume.experience.filter((x) => x.role || x.company).length ? (
           <section>
-            <h2 className={sectionTitleClass}>Experience</h2>
+            <h2 className={sectionTitleClass}>{t.experience}</h2>
             <div className="space-y-4">
               {resume.experience.map((item, index) =>
                 item.role || item.company ? (
@@ -337,7 +535,7 @@ function ResumePreview({ resume, template }) {
 
         {resume.projects.filter((x) => x.name).length ? (
           <section>
-            <h2 className={sectionTitleClass}>Projects</h2>
+            <h2 className={sectionTitleClass}>{t.projects}</h2>
             <div className="space-y-4">
               {resume.projects.map((item, index) =>
                 item.name ? (
@@ -359,7 +557,7 @@ function ResumePreview({ resume, template }) {
 
         {resume.education.filter((x) => x.school || x.degree).length ? (
           <section>
-            <h2 className={sectionTitleClass}>Education</h2>
+            <h2 className={sectionTitleClass}>{t.education}</h2>
             <div className="space-y-3">
               {resume.education.map((item, index) =>
                 item.school || item.degree ? (
@@ -382,7 +580,7 @@ function ResumePreview({ resume, template }) {
         <div className="grid gap-5 md:grid-cols-2">
           {clean(resume.certifications).length ? (
             <section>
-              <h2 className={sectionTitleClass}>Certifications</h2>
+              <h2 className={sectionTitleClass}>{t.certifications}</h2>
               <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
                 {clean(resume.certifications).map((item, index) => <li key={index}>{item}</li>)}
               </ul>
@@ -391,7 +589,7 @@ function ResumePreview({ resume, template }) {
 
           {clean(resume.languages).length ? (
             <section>
-              <h2 className={sectionTitleClass}>Languages</h2>
+              <h2 className={sectionTitleClass}>{t.languages}</h2>
               <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700">
                 {clean(resume.languages).map((item, index) => <li key={index}>{item}</li>)}
               </ul>
@@ -451,6 +649,7 @@ export default function ResumeBuilderWebsite() {
   const [resume, setResume] = useState(starterResume);
   const [template, setTemplate] = useState("modern");
   const [activeTab, setActiveTab] = useState("basic");
+  const [language, setLanguage] = useState("en");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -460,6 +659,7 @@ export default function ResumeBuilderWebsite() {
         const parsed = JSON.parse(raw);
         if (parsed.resume) setResume(parsed.resume);
         if (parsed.template) setTemplate(parsed.template);
+        if (parsed.language) setLanguage(parsed.language);
       }
     } catch (error) {
       console.warn("Could not load saved resume", error);
@@ -496,18 +696,19 @@ export default function ResumeBuilderWebsite() {
   };
 
   const saveData = () => {
-    localStorage.setItem("resume-builder-data", JSON.stringify({ resume, template }));
+    localStorage.setItem("resume-builder-data", JSON.stringify({ resume, template, language }));
     setSaved(true);
   };
 
   const resetData = () => {
     setResume(starterResume);
     setTemplate("modern");
+    setLanguage("en");
     setSaved(false);
   };
 
   const exportJSON = () => {
-    const blob = new Blob([JSON.stringify({ resume, template }, null, 2)], { type: "application/json" });
+    const blob = new Blob([JSON.stringify({ resume, template, language }, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -525,6 +726,7 @@ export default function ResumeBuilderWebsite() {
         const parsed = JSON.parse(String(reader.result));
         if (parsed.resume) setResume(parsed.resume);
         if (parsed.template) setTemplate(parsed.template);
+        if (parsed.language) setLanguage(parsed.language);
         setSaved(false);
       } catch (error) {
         alert("文件格式不正确，请上传之前导出的 JSON 文件。");
@@ -533,12 +735,14 @@ export default function ResumeBuilderWebsite() {
     reader.readAsText(file);
   };
 
+  const t = uiText[language];
+
   const tabs = [
-    { id: "basic", label: "基本信息", icon: User },
-    { id: "experience", label: "经历", icon: Briefcase },
-    { id: "projects", label: "项目", icon: Code2 },
-    { id: "education", label: "教育", icon: GraduationCap },
-    { id: "extra", label: "技能/其他", icon: Award },
+    { id: "basic", label: t.basic, icon: User },
+    { id: "experience", label: t.expTab, icon: Briefcase },
+    { id: "projects", label: t.projectsTab, icon: Code2 },
+    { id: "education", label: t.educationTab, icon: GraduationCap },
+    { id: "extra", label: t.extraTab, icon: Award },
   ];
 
   return (
@@ -565,6 +769,22 @@ export default function ResumeBuilderWebsite() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
+            <div className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+              <button
+                type="button"
+                onClick={() => setLanguage("zh")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-black transition ${language === "zh" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+              >
+                中文
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`rounded-lg px-3 py-1.5 text-xs font-black transition ${language === "en" ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+              >
+                EN
+              </button>
+            </div>
             <Button variant="outline" className="rounded-xl" onClick={saveData}>
               <Save className="mr-2 h-4 w-4" /> {saved ? "已保存" : "保存"}
             </Button>
@@ -589,8 +809,8 @@ export default function ResumeBuilderWebsite() {
               <CardContent className="p-4">
                 <div className="mb-3 flex items-center justify-between gap-2">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Templates</p>
-                    <h2 className="text-base font-black">选择简历模板</h2>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{t.templates}</p>
+                    <h2 className="text-base font-black">{t.chooseTemplate}</h2>
                   </div>
                   <Palette className="h-5 w-5 text-slate-500" />
                 </div>
@@ -617,7 +837,7 @@ export default function ResumeBuilderWebsite() {
 
           <Card className="rounded-2xl border-0 shadow-sm">
             <CardContent className="p-4">
-              <SectionHeader icon={Sparkles} title="AI 写作提示" subtitle="把描述改成更像求职简历的表达" />
+              <SectionHeader icon={Sparkles} title={t.aiTips} subtitle={t.aiTipSub} />
               <div className="space-y-2 text-xs leading-5 text-slate-600">
                 <p>1. 用动作动词开头：Built / Designed / Improved / Managed。</p>
                 <p>2. 加入结果：减少了多少时间、提升了多少准确率、服务了多少用户。</p>
@@ -794,7 +1014,7 @@ export default function ResumeBuilderWebsite() {
         </aside>
 
         <section className="overflow-auto rounded-3xl bg-slate-200 p-4 print:overflow-visible print:rounded-none print:bg-white print:p-0">
-          <ResumePreview resume={resume} template={template} />
+          <ResumePreview resume={resume} template={template} language={language} />
         </section>
       </main>
     </div>
