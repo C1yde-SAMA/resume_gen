@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 function makeIcon(label) {
   return function InlineIcon({ className = "" }) {
@@ -33,7 +33,7 @@ const MapPin = makeIcon("⌖");
 const LinkIcon = makeIcon("↗");
 
 const motion = {
-  div: ({ children, initial, animate, transition, ...props }) => <div {...props}>{children}</div>,
+  div: ({ children, ...props }) => <div {...props}>{children}</div>,
 };
 
 function Card({ children, className = "" }) {
@@ -135,12 +135,85 @@ const starterResume = {
   certifications: ["Project Management coursework", "Service operations and ITIL study"],
 };
 
-const templates = [
-  { id: "modern", label: "Modern", description: "适合科技、产品、设计岗位" },
-  { id: "executive", label: "Executive", description: "类似截图：左侧信息栏 + 深色标题栏" },
-  { id: "classic", label: "Classic", description: "适合正式企业、学校申请" },
-  { id: "compact", label: "Compact", description: "内容多时更省空间" },
-];
+const starterResumes = {
+  en: starterResume,
+  zh: {
+    personal: {
+      name: "陈凯德",
+      title: "软件开发 / 人工智能方向学生",
+      email: "clyde@example.com",
+      phone: "+61 400 000 000",
+      location: "澳大利亚 悉尼",
+      website: "linkedin.com/in/clyde",
+      summary:
+        "软件开发方向学生，具备 Python、JavaScript、React、机器学习原型开发以及项目质量与风险管理经验。擅长把业务需求拆解为可落地的产品功能，并通过测试、文档和协作流程提升交付稳定性。",
+    },
+    skills: ["Python", "JavaScript", "React", "HTML/CSS", "机器学习", "需求分析", "风险管理", "质量管理", "项目协作"],
+    experience: [
+      {
+        role: "AI 购物车平台 - 质量与风险负责人",
+        company: "大学项目",
+        location: "悉尼",
+        start: "2025",
+        end: "至今",
+        bullets: [
+          "制定用户分析、商品识别、场景识别和推荐模块的质量标准，提升团队交付一致性。",
+          "建立风险登记表，覆盖模型准确率、数据质量、集成延期和前端可用性等关键风险。",
+          "协调 Python 机器学习组件与 HTML/JavaScript 前端功能的测试优先级，减少集成阶段返工。",
+        ],
+      },
+    ],
+    education: [
+      {
+        school: "悉尼大学",
+        degree: "软件开发 / 信息技术相关课程",
+        location: "澳大利亚 悉尼",
+        start: "2024",
+        end: "至今",
+        details: "相关课程：IT 项目管理、服务运营、数据库概念、软件开发与系统设计。",
+      },
+    ],
+    projects: [
+      {
+        name: "AI 购物车推荐系统",
+        tech: "Python, JavaScript, HTML, Machine Learning",
+        link: "",
+        bullets: [
+          "设计基于图像识别与上下文用户分析的模块化推荐流程，支持更贴近场景的商品推荐。",
+          "编写质量与风险管理计划，明确验收标准、测试重点和应急方案，降低项目不确定性。",
+        ],
+      },
+    ],
+    languages: ["中文 - 母语", "英语 - 专业工作能力"],
+    certifications: ["项目管理课程", "服务运营与 ITIL 学习经历"],
+  },
+};
+
+const templateCopy = {
+  zh: {
+    modern: ["现代", "适合科技、产品、设计岗位"],
+    executive: ["高管", "左侧信息栏 + 深色标题栏"],
+    classic: ["经典", "适合正式企业、学校申请"],
+    compact: ["紧凑", "内容多时更省空间"],
+    sidebar: ["侧栏", "技能和联系信息更醒目"],
+    timeline: ["时间线", "突出经历顺序和成长路径"],
+    academic: ["学术", "课程、研究、申请场景"],
+    creative: ["创意", "适合设计、内容、产品作品集"],
+  },
+  en: {
+    modern: ["Modern", "Tech, product, and design roles"],
+    executive: ["Executive", "Sidebar profile with strong title band"],
+    classic: ["Classic", "Formal companies and school applications"],
+    compact: ["Compact", "Space-saving for longer resumes"],
+    sidebar: ["Sidebar", "Highlights contact and skill groups"],
+    timeline: ["Timeline", "Shows career flow and growth"],
+    academic: ["Academic", "Coursework, research, applications"],
+    creative: ["Creative", "Design, content, and portfolio roles"],
+  },
+};
+
+const templateIds = ["modern", "executive", "classic", "compact", "sidebar", "timeline", "academic", "creative"];
+const getTemplates = (language) => templateIds.map((id) => ({ id, label: templateCopy[language][id][0], description: templateCopy[language][id][1] }));
 
 const uiText = {
   zh: {
@@ -164,6 +237,8 @@ const uiText = {
     languageSwitch: "语言",
     chinese: "中文",
     english: "English",
+    loadZh: "载入中文示例",
+    loadEn: "载入英文示例",
   },
   en: {
     profile: "Summary",
@@ -186,6 +261,8 @@ const uiText = {
     languageSwitch: "Language",
     chinese: "中文",
     english: "English",
+    loadZh: "Load Chinese Sample",
+    loadEn: "Load English Sample",
   },
 };
 
@@ -457,30 +534,51 @@ function ResumePreview({ resume, template, language }) {
   }
 
   const t = uiText[language];
-  const sectionTitleClass =
-    template === "classic"
-      ? "mb-2 border-b border-slate-300 pb-1 font-serif text-sm font-bold uppercase tracking-[0.18em] text-slate-900"
-      : template === "compact"
-        ? "mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-slate-500"
-        : "mb-2 text-sm font-black uppercase tracking-[0.2em] text-slate-900";
+  const sectionTitleClass = {
+    modern: "mb-2 text-sm font-black uppercase tracking-[0.2em] text-slate-900",
+    classic: "mb-2 border-b border-slate-300 pb-1 font-serif text-sm font-bold uppercase tracking-[0.18em] text-slate-900",
+    compact: "mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-slate-500",
+    sidebar: "mb-2 text-xs font-black uppercase tracking-[0.18em] text-cyan-900",
+    timeline: "mb-2 border-b border-slate-300 pb-1 text-sm font-black uppercase tracking-[0.18em] text-slate-900",
+    academic: "mb-2 border-b-2 border-slate-900 pb-1 font-serif text-sm font-bold uppercase tracking-[0.18em] text-slate-900",
+    creative: "mb-2 text-sm font-black uppercase tracking-[0.16em] text-teal-800",
+  }[template] || "mb-2 text-sm font-black uppercase tracking-[0.2em] text-slate-900";
 
-  const wrapperClass =
-    template === "classic"
-      ? "font-serif text-slate-900"
-      : "font-sans text-slate-900";
+  const wrapperClass = {
+    classic: "font-serif text-slate-900",
+    academic: "font-serif text-slate-900",
+  }[template] || "font-sans text-slate-900";
 
   const spacing = template === "compact" ? "space-y-3" : "space-y-5";
+  const pageClass = {
+    modern: "bg-white p-10",
+    classic: "bg-white p-10",
+    compact: "bg-white p-8",
+    sidebar: "border-l-[88px] border-slate-900 bg-white p-10",
+    timeline: "bg-white p-10",
+    academic: "bg-white p-10",
+    creative: "bg-teal-50 p-10",
+  }[template] || "bg-white p-10";
+  const headerClass = {
+    modern: "border-b-4 border-slate-900 pb-5",
+    classic: "border-b border-slate-300 pb-4 text-center",
+    compact: "border-b border-slate-200 pb-3",
+    sidebar: "border-b border-cyan-900 pb-5",
+    timeline: "border-b border-slate-300 pb-5",
+    academic: "border-y-2 border-slate-900 py-5 text-center",
+    creative: "rounded-2xl bg-white p-6 shadow-sm",
+  }[template] || "border-b-4 border-slate-900 pb-5";
 
   const clean = (arr) => arr.filter((item) => String(item || "").trim());
 
   return (
-    <div id="resume-preview" className={`mx-auto min-h-[1056px] w-full max-w-[816px] bg-white p-10 shadow-2xl print:shadow-none ${wrapperClass}`}>
-      <header className={template === "modern" ? "border-b-4 border-slate-900 pb-5" : "border-b border-slate-300 pb-4 text-center"}>
+    <div id="resume-preview" className={`mx-auto min-h-[1056px] w-full max-w-[816px] shadow-2xl print:shadow-none ${pageClass} ${wrapperClass}`}>
+      <header className={headerClass}>
         <h1 className={template === "compact" ? "text-3xl font-black tracking-tight" : "text-4xl font-black tracking-tight"}>
           {resume.personal.name || "Your Name"}
         </h1>
         <p className="mt-1 text-base font-semibold text-slate-600">{resume.personal.title || "Target Role / Professional Title"}</p>
-        <div className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 ${template === "classic" ? "justify-center" : ""}`}>
+        <div className={`mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-600 ${(template === "classic" || template === "academic") ? "justify-center" : ""}`}>
           {resume.personal.email ? <span>{resume.personal.email}</span> : null}
           {resume.personal.phone ? <span>{resume.personal.phone}</span> : null}
           {resume.personal.location ? <span>{resume.personal.location}</span> : null}
@@ -501,8 +599,8 @@ function ResumePreview({ resume, template, language }) {
             <h2 className={sectionTitleClass}>{t.skills}</h2>
             <div className="flex flex-wrap gap-2">
               {clean(resume.skills).map((skill, index) => (
-                <span key={index} className={template === "classic" ? "text-sm text-slate-700" : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"}>
-                  {skill}{template === "classic" && index < clean(resume.skills).length - 1 ? " ·" : ""}
+                <span key={index} className={(template === "classic" || template === "academic") ? "text-sm text-slate-700" : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700"}>
+                  {skill}{(template === "classic" || template === "academic") && index < clean(resume.skills).length - 1 ? " ·" : ""}
                 </span>
               ))}
             </div>
@@ -645,26 +743,22 @@ function ScoreCard({ resume }) {
   );
 }
 
-export default function ResumeBuilderWebsite() {
-  const [resume, setResume] = useState(starterResume);
-  const [template, setTemplate] = useState("modern");
-  const [activeTab, setActiveTab] = useState("basic");
-  const [language, setLanguage] = useState("en");
-  const [saved, setSaved] = useState(false);
+function loadSavedResumeData() {
+  try {
+    const raw = localStorage.getItem("resume-builder-data");
+    return raw ? JSON.parse(raw) : {};
+  } catch (error) {
+    console.warn("Could not load saved resume", error);
+    return {};
+  }
+}
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("resume-builder-data");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed.resume) setResume(parsed.resume);
-        if (parsed.template) setTemplate(parsed.template);
-        if (parsed.language) setLanguage(parsed.language);
-      }
-    } catch (error) {
-      console.warn("Could not load saved resume", error);
-    }
-  }, []);
+export default function ResumeBuilderWebsite() {
+  const [resume, setResume] = useState(() => loadSavedResumeData().resume || starterResumes.en);
+  const [template, setTemplate] = useState(() => loadSavedResumeData().template || "modern");
+  const [activeTab, setActiveTab] = useState("basic");
+  const [language, setLanguage] = useState(() => loadSavedResumeData().language || "en");
+  const [saved, setSaved] = useState(false);
 
   const updatePersonal = (key, value) => {
     setResume((prev) => ({ ...prev, personal: { ...prev.personal, [key]: value } }));
@@ -700,10 +794,15 @@ export default function ResumeBuilderWebsite() {
     setSaved(true);
   };
 
+  const loadSample = (nextLanguage) => {
+    setResume(starterResumes[nextLanguage]);
+    setLanguage(nextLanguage);
+    setSaved(false);
+  };
+
   const resetData = () => {
-    setResume(starterResume);
+    setResume(starterResumes[language]);
     setTemplate("modern");
-    setLanguage("en");
     setSaved(false);
   };
 
@@ -728,7 +827,7 @@ export default function ResumeBuilderWebsite() {
         if (parsed.template) setTemplate(parsed.template);
         if (parsed.language) setLanguage(parsed.language);
         setSaved(false);
-      } catch (error) {
+      } catch {
         alert("文件格式不正确，请上传之前导出的 JSON 文件。");
       }
     };
@@ -736,6 +835,7 @@ export default function ResumeBuilderWebsite() {
   };
 
   const t = uiText[language];
+  const templates = getTemplates(language);
 
   const tabs = [
     { id: "basic", label: t.basic, icon: User },
@@ -814,7 +914,7 @@ export default function ResumeBuilderWebsite() {
                   </div>
                   <Palette className="h-5 w-5 text-slate-500" />
                 </div>
-                <div className="grid gap-2">
+                <div className="grid gap-2 sm:grid-cols-2">
                   {templates.map((item) => (
                     <button
                       key={item.id}
@@ -828,6 +928,10 @@ export default function ResumeBuilderWebsite() {
                       <p className={`mt-1 text-xs ${template === item.id ? "text-slate-200" : "text-slate-500"}`}>{item.description}</p>
                     </button>
                   ))}
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <Button variant="secondary" size="sm" className="rounded-xl" onClick={() => loadSample("zh")}>{t.loadZh}</Button>
+                  <Button variant="secondary" size="sm" className="rounded-xl" onClick={() => loadSample("en")}>{t.loadEn}</Button>
+                </div>
                 </div>
               </CardContent>
             </Card>
